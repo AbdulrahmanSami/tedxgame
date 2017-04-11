@@ -1,0 +1,75 @@
+<!--tedx/templates/tedx/index.html-->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Yaseen Game</title>
+    <style>
+        body {
+            font-size : 24px;
+            background-color : #F0FFFF;
+        }
+        #welcome {
+            text-align: center;
+        }
+        #start{
+            text-align: center;
+        }
+        .question > p{
+            display : none;
+            text-align:center;
+        }
+        .choice {
+            display : none;
+            text-align:center;
+            text-font: 30px;
+        }
+    </style>
+</head>
+<body>
+    <h1 id="welcome">Welcome to Yaseen game</h1>
+
+    <div id="start">
+        <button id="btn" style="font-size:30px"> Start </button>
+    </div>
+
+    <div class="question">
+        <p> the first question the first question the first the first question</p>
+        <button class="choice" data-choice-pk="1"> choice one </button>
+        <button class="choice" data-choice-pk="2"> choice two</button>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            var startBtn = $("#btn")
+            var question = $(".question")
+            var welcome = $("#welcome")
+            var choiceBtn = $(".choice")
+            startBtn.on('click', function() {
+                startBtn.hide(100);
+                welcome.hide(100);
+                $(".question > p").show(100);
+                choiceBtn.show(100);
+            })
+
+            choiceBtn.on('click', function(){
+                var chosenPk = $(this).data('choice-pk')
+                $.ajax({
+                    type: 'POST',
+                    url: /handle_ajax/ ,
+                    data: {"chosenPk": chosenPk},
+                    dataType: "json",
+                    headers: {'X-CSRFToken': '{{ csrf_token }}'},
+                    success: function(){
+                        question.empty();
+                        question.html("<p> next question </p>");
+                        question.html("<button class='choice' data-choice-pk='1'> choice one </button>" );
+                        question.html("<button class='choice' data-choice-pk='appropiate pk'>second choice</button>" );
+
+                    }
+                })
+            })
+
+        })
+    </script>
+</body>
+</html>
