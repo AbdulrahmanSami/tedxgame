@@ -8,5 +8,5 @@ def handle_index(request):
 
 @csrf.csrf_exempt
 def handle_ajax(request):
-    request='post'
-    return HttpResponse
+    request='POST'
+    return HttpResponse("Hello there")
