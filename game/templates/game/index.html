@@ -1,36 +1,14 @@
-<!--tedx/templates/tedx/index.html-->
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Yaseen Game</title>
-    <style>
-        body {
-            font-size : 24px;
-            background-color : #F0FFFF;
-        }
-        #start{
-            text-align: center;
-        }
-        #question{
-            display : none;
-            text-align:center;
-        }
-        .choice {
-            text-align:center;
-            text-font: 30px;
-        }
-    </style>
-</head>
-<body>
+{% extends 'game/game_base.html' %}
+{% block content %}
     <div id="start">
         <h1 id="welcome">Welcome to Yaseen game</h1>
         <button id="start-btn" style="font-size:30px"> Start </button>
     </div>
 
     <div id="question">
-        <p> the first question the first question the first the first question</p>
-        <button class="choice" data-choice-pk="1" type="button">First choice</button>
-        <button class="choice" data-choice-pk="2" type="button">Second choice</button>
+        <p id="question-text"> {{ first_question.question_text }}</p>
+        <button id="choice1" class="choice" data-choice-pk="{{ first_question.choices.first.pk }}" type="button" icon="{{ first_question.choices.first.icon }}" class="btn fa fa-bath">{{ first_question.choices.first.choice_text }}</button>
+        <button id="choice2" class="choice" data-choice-pk="{{ first_question.choices.last.pk }}" type="button" class="btn fa fa-bath">{{ first_question.choices.last.choice_text }}</button>
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script>
@@ -39,29 +17,39 @@
             var question = $("#question")
             var preGame = $("#start")
             var choiceBtn = $(".choice")
-            choiceBtn.hide(100);
-            startBtn.on('click', function() {
+            startBtn.click(function() {
                 preGame.hide(100);
                 question.show(100);
                 choiceBtn.show(100);
             })
 
-            choiceBtn.on('click', function(){
+            choiceBtn.click(function(){
+
+                choice_pk = $(this).data('choice-pk');
                 $.ajax({
                     type: 'POST',
-                    url: "/handle_ajax/" ,
-                    success: function(){
-                        question.empty();
-                        question.append("<p>ياسين محتار وش يسوي</p> ");
-                        question.append("<button data-choice-pk='1' type='button'>First choice</button>");
-                        question.append("<button data-choice-pk='2' type='button'>Second choice</button>");
-                        $(":button").addClass('choice');
-                        choiceBtn.show(100);
+                    data: {choice_pk: choice_pk},
+                    url: "{% url 'handle_ajax' %}" ,
+                    success: function(data){
+                        obj = JSON.parse(data);
+                        $("#question-text").html(obj.next_question_text);
+                        if (!obj.choice1_text){
+                            $("#choice1, #choice2").hide()
+                        } else {
+                            $("#choice1").html(obj.choice1_text).data("choice-pk", obj.choice1_pk).attr("class", "btn fa fa-" + data.choice1_icon)
+                            $("#choice2").html(obj.choice2_text).data("choice-pk", obj.choice2_pk).attr("class", "btn fa fa-" + data.choice2_icon)
+                        }
+
+                        if (obj.flag){
+                            if (obj.flag == "rain"){
+                              $("body").css("background", "black");
+                            } else if (obj.flag == "sun") {
+                            }
+                        }
                     }
                 })
             })
 
         })
-    </script>
-</body>
-</html>
+        </script>
+{% endblock %}
