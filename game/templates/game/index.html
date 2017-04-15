@@ -1,54 +1,152 @@
 {% extends 'game/game_base.html' %}
 {% block content %}
+{% load staticfiles %}
     <div id="start">
-        <h1 id="welcome">Welcome to Yaseen game</h1>
-        <button id="start-btn" style="font-size:30px"> Start </button>
+
+        <img id="welcomeimg" src="{% static 'image/yaseen.png' %}" >
+        <p id="welcome" style="">                          أهلاً بك في لعبة يا..س
+            <br>
+هذه اللعبة مستوحاة من نظريّة "تأثير الفراشة" توصف هذه النظرية تلك الظواهر ذات الترابط والتأثير المتبادل والمتواتر الذي يكون نتيجة حدث أول، قد يكون بسيطاً، لكنه يولّد سلسلة متتابعة من النتائج والتطورات التي يفوق حجمها بمراحل حدث البداية، وبشكل قد لا يتوقعه أحد، وفى أماكن أبعد ما تكون عن التصوّر.<br>
+<br>
+تتيح لك اللعبة تجربة أن تكون المتحكّم في هذه الأحداث الأولية .
+كن حذراً في اختيارك، فرفرفة جناح فراشة قد تسببت بإعصار !</p>
+        <button id="start-btn" > اضغط هنا لبدء اللعبة ! </button>
+
     </div>
 
     <div id="question">
         <p id="question-text"> {{ first_question.question_text }}</p>
         <button id="choice1" class="choice" data-choice-pk="{{ first_question.choices.first.pk }}" type="button" icon="{{ first_question.choices.first.icon }}" class="btn fa fa-bath">{{ first_question.choices.first.choice_text }}</button>
-        <button id="choice2" class="choice" data-choice-pk="{{ first_question.choices.last.pk }}" type="button" class="btn fa fa-bath">{{ first_question.choices.last.choice_text }}</button>
+        <button id="choice2" class="choice" data-choice-pk="{{ first_question.choices.last.pk }}" type="button" icon="{{ first_question.choices.last.icon }}" class="btn fa fa-bath">{{ first_question.choices.last.choice_text }}</button>
+        <p id="playagain"></p>
+        <br> <img src="{% static 'image/yaseen.png' %}" id="questionimg">
     </div>
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script>
             $(document).ready(function() {
-            var startBtn = $("#start-btn")
-            var question = $("#question")
-            var preGame = $("#start")
-            var choiceBtn = $(".choice")
-            startBtn.click(function() {
-                preGame.hide(100);
-                question.show(100);
-                choiceBtn.show(100);
-            })
-
-            choiceBtn.click(function(){
-
-                choice_pk = $(this).data('choice-pk');
-                $.ajax({
-                    type: 'POST',
-                    data: {choice_pk: choice_pk},
-                    url: "{% url 'handle_ajax' %}" ,
-                    success: function(data){
-                        obj = JSON.parse(data);
-                        $("#question-text").html(obj.next_question_text);
-                        if (!obj.choice1_text){
-                            $("#choice1, #choice2").hide()
-                        } else {
-                            $("#choice1").html(obj.choice1_text).data("choice-pk", obj.choice1_pk).attr("class", "btn fa fa-" + data.choice1_icon)
-                            $("#choice2").html(obj.choice2_text).data("choice-pk", obj.choice2_pk).attr("class", "btn fa fa-" + data.choice2_icon)
+                $.fn.extend({
+                    animateCss: function (animationName) {
+                    var animationEnd = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
+                    this.addClass('animated ' + animationName).one(animationEnd, function() {
+                    $(this).removeClass('animated ' + animationName);
+                            });
                         }
+                });
+                var startBtn = $("#start-btn")
+                var question = $("#question")
+                var preGame = $("#start")
+                var choiceBtn = $(".choice");
+                preGame.animateCss('fadeInDown')
 
-                        if (obj.flag){
-                            if (obj.flag == "rain"){
-                              $("body").css("background", "black");
-                            } else if (obj.flag == "sun") {
+                startBtn.click(function() {
+                    preGame.hide()
+                    if ("stay with the sheep" == "{{ first_question.choices.first.title }}"){
+                        $("html.detail").css({"background": "url('{% static 'image/desert.jpg' %}')",
+                        "-webkit-background-size": "cover",
+                        "-moz-background-size": "cover",
+                        "-o-background-size": "cover",
+                        "background-size": "cover"})
+                    }
+                    else {
+                    $("html.detail").css({"background": "url('{% static 'image/umbrella.jpg' %}')",
+                        "-webkit-background-size": "cover",
+                        "-moz-background-size": "cover",
+                        "-o-background-size": "cover",
+                        "background-size": "cover"})}
+
+                    setTimeout(function () {
+                        question.show().animateCss('zoomIn');
+                        choiceBtn.show().animateCss('zoomIn');}, 200
+                    );
+                })
+
+                choiceBtn.click(function(){
+
+                    choice_pk = $(this).data('choice-pk');
+                    $.ajax({
+                        type: 'POST',
+                        data: {choice_pk: choice_pk},
+                        url: "{% url 'handle_ajax' %}" ,
+                        success: function(data){
+                            obj = JSON.parse(data);
+                            $("#question-text").html(obj.next_question_text).animateCss('zoomIn');
+                            if (!obj.choice1_text){
+                                $("#choice1, #choice2").hide()
+                                $("#playagain").html(" <p> <br><br><a href='{% url 'handle_index' %}'>اضغط هنا</a>  للعب مجددََا. &thinsp;  </p> ")
+                            } else {
+                                $("#choice1").html(obj.choice1_text).data("choice-pk", obj.choice1_pk).animateCss('zoomIn')
+                                $("#choice2").html(obj.choice2_text).data("choice-pk", obj.choice2_pk).animateCss('zoomIn')
+                            }
+
+                            if (obj.flag){
+                                if (obj.flag == "rain"){
+                                 $("html.detail").css({"background": "url('{% static 'image/rain.jpg' %}')",
+                                         "-webkit-background-size": "cover",
+                                         "-moz-background-size": "cover",
+                                         "-o-background-size": "cover",
+                                         "background-size": "cover",
+
+                                    });
+                                }
+                                else if (obj.flag == "umbrella") {
+                                    $("html.detail").css({"background": "url('{% static 'image/umbrella.jpg' %}')",
+                                         "-webkit-background-size": "cover",
+                                         "-moz-background-size": "cover",
+                                         "-o-background-size": "cover",
+                                         "background-size": "cover",
+
+                                    });
+                                }
+                                else if (obj.flag == "football") {
+                                    $("html.detail").css({"background": "url('{% static 'image/football.jpg' %}')",
+                                         "-webkit-background-size": "cover",
+                                         "-moz-background-size": "cover",
+                                         "-o-background-size": "cover",
+                                         "background-size": "cover",
+
+                                    });
+                                }
+                                else if (obj.flag == "sheep") {
+                                    $("html.detail").css({"background": "url('{% static 'image/sheep.jpg' %}')",
+                                         "-webkit-background-size": "cover",
+                                         "-moz-background-size": "cover",
+                                         "-o-background-size": "cover",
+                                         "background-size": "cover",
+
+                                    });
+                                }
+                                else if (obj.flag == "study") {
+                                    $("html.detail").css({"background": "url('{% static 'image/study.jpg' %}')",
+                                         "-webkit-background-size": "cover",
+                                         "-moz-background-size": "cover",
+                                         "-o-background-size": "cover",
+                                         "background-size": "cover",
+
+                                    });
+                                }
+                                else if (obj.flag == "library") {
+                                    $("html.detail").css({"background": "url('{% static 'image/library.jpg' %}')",
+                                         "-webkit-background-size": "cover",
+                                         "-moz-background-size": "cover",
+                                         "-o-background-size": "cover",
+                                         "background-size": "cover",
+
+                                    });
+                                }
+                                else {
+                                    $("html.detail").css({"background": "url('{% static 'image/background.jpg' %}')",
+                                         "-webkit-background-size": "cover",
+                                         "-moz-background-size": "cover",
+                                         "-o-background-size": "cover",
+                                         "background-size": "cover",
+
+                                    });
+                                }
                             }
                         }
-                    }
+                    })
                 })
-            })
 
         })
         </script>

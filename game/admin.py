@@ -6,6 +6,6 @@ class QuestionAdmin(admin.ModelAdmin):
     fields = ['title','question_text']
 admin.site.register(Question,QuestionAdmin)
 class ChoiceAdmin(admin.ModelAdmin):
-    fields = ['title','choice_text','question','next_question','icon']
+    fields = ['title','choice_text','question','next_question','flag']
 admin.site.register(Choice,ChoiceAdmin)
 admin.site.register(Game)

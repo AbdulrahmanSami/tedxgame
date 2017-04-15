@@ -1,11 +1,13 @@
 from django.shortcuts import render
 from django.views.decorators import csrf
-from .models import Choice, Question
+from .models import Choice, Question,Game
 from django.http import HttpResponse
 import json
 # -*- coding: utf-8  -*-
 def handle_index(request):
-    first_question = Question.objects.filter(leading_choices__isnull=True).first()
+    #first_question = Question.objects.filter(leading_choices__isnull=True).first()
+    game = Game.objects.order_by("?").first()
+    first_question = game.first_question
     return render(request, "game/index.html", {'first_question': first_question})
 
 @csrf.csrf_exempt
